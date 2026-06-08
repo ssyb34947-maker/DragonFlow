@@ -271,7 +271,7 @@ def download_index_daily(
 # ===========================================================================
 # 3. 个股日行情
 # ===========================================================================
-def _fetch_single_stock_daily(
+def _fetch_single_stock_daily_em(
     stock_code: str,
     start_date: str,
     end_date: str,
@@ -298,6 +298,78 @@ def _fetch_single_stock_daily(
             df[col] = None
     df = df[STOCK_DAILY_COLS]
     return df
+
+
+_SINA_RENAME: dict[str, str] = {
+    "date": "date",
+    "open": "open",
+    "high": "high",
+    "low": "low",
+    "close": "close",
+    "volume": "volume",
+    "amount": "amount",
+    "turnover": "turnover_rate",  # 新浪的 turnover 即换手率
+}
+
+
+def _fetch_single_stock_daily_sina(
+    stock_code: str,
+    start_date: str,
+    end_date: str,
+    adjust: str = "qfq",
+) -> pd.DataFrame:
+    """新浪源 fallback。symbol 需要前缀 sh/sz/bj。"""
+    code = str(stock_code).zfill(6)
+    # 顺序敏感：92 是北交所新代码段，必须先于 9xxxxx 的 sh B 股判断
+    if code.startswith(("8", "4", "92")):
+        prefix = "bj"
+    elif code.startswith(("60", "68", "11", "5", "9")):
+        prefix = "sh"
+    else:
+        prefix = "sz"
+    sym = f"{prefix}{code}"
+    sd = to_yyyymmdd(start_date)
+    ed = to_yyyymmdd(end_date)
+    raw = ak.stock_zh_a_daily(symbol=sym, start_date=sd, end_date=ed, adjust=adjust)
+    if raw is None or raw.empty:
+        return pd.DataFrame()
+    df = raw.rename(columns=_SINA_RENAME).copy()
+    if "date" not in df.columns:
+        df = df.reset_index().rename(columns=_SINA_RENAME)
+    df["stock_code"] = code
+    df["adjust"] = adjust
+    df["source"] = "stock_zh_a_daily(sina)"
+    df = standardize_date_col(df, "date")
+    # 新浪缺这些字段，置空（后续画像也可用 close 推算 pct_change）
+    for col in STOCK_DAILY_COLS:
+        if col not in df.columns:
+            df[col] = None
+    return df[STOCK_DAILY_COLS]
+
+
+def _fetch_single_stock_daily(
+    stock_code: str,
+    start_date: str,
+    end_date: str,
+    adjust: str = "qfq",
+) -> pd.DataFrame:
+    """EM 主源 + sina 备源。某一只 EM 抓不到（限流/封 IP）时自动降级到 sina。"""
+    try:
+        df = _fetch_single_stock_daily_em(stock_code, start_date, end_date, adjust)
+        if df is not None and not df.empty:
+            return df
+        raise RuntimeError("EM empty")
+    except Exception as em_err:  # noqa: BLE001
+        try:
+            df2 = _fetch_single_stock_daily_sina(stock_code, start_date, end_date, adjust)
+            if df2 is not None and not df2.empty:
+                return df2
+        except Exception as sina_err:  # noqa: BLE001
+            raise RuntimeError(
+                f"EM={type(em_err).__name__}:{em_err}; SINA={type(sina_err).__name__}:{sina_err}"
+            ) from sina_err
+        # 两边都返回空
+        return pd.DataFrame()
 
 
 def download_stock_daily_one(
