@@ -1,0 +1,38 @@
+# DragonFlow 全局配置（默认值，命令行参数可覆盖）
+
+project:
+  name: DragonFlow
+  description: A股龙头/热点股数据可视化分析
+
+data:
+  # 默认分析对象：中证2000
+  index_code: "932000"
+  index_name: "中证2000"
+
+  # 默认时间窗口（2026 年 1-5 月）
+  start_date: "2026-01-01"
+  end_date: "2026-05-31"
+
+  # 复权方式：前复权
+  adjust: "qfq"
+
+download:
+  sleep: 0.3          # 单只股票请求间隔（秒）
+  max_workers: 1      # 当前默认串行（避免 AkShare/东方财富限流）
+  force: false        # 已存在文件是否强制覆盖
+  preferred_quarter: "20260331"  # 财务报表首选季度
+  fallback_quarters:             # 自动回退顺序
+    - "20251231"
+    - "20250930"
+    - "20250630"
+
+paths:
+  raw_csi: "data/raw/csi2000"
+  raw_stock_daily: "data/raw/stock_daily"
+  raw_fundamental: "data/raw/fundamental"
+  processed: "data/processed"
+  logs: "logs"
+
+quality:
+  expected_n_constituents: 2000
+  fail_ratio_warn: 0.20  # 失败比例 > 20% 触发警告

@@ -1,7 +1,24 @@
 [project]
 name = "df"
 version = "0.1.0"
-description = "Add your description here"
+description = "DragonFlow: A Visualization System for Market Leaders and Theme Rotation"
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = []
+dependencies = [
+    "akshare>=1.13.0",
+    "pandas>=2.1.0",
+    "numpy>=1.26.0",
+    "pyarrow>=14.0.0",
+    "tqdm>=4.66.0",
+    "pyyaml>=6.0",
+    "tenacity>=8.2.0",
+    "loguru>=0.7.0",
+    "requests>=2.31.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/dragonflow"]
