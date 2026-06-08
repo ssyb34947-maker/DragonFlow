@@ -1,0 +1,346 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import "tailwindcss";
+
+/* ============================================================
+   DragonFlow Design System — Bitcoin DeFi Aesthetic
+   ============================================================ */
+
+@theme {
+  /* --- Core Colors --- */
+  --color-bg: #030304;
+  --color-surface: #0F1115;
+  --color-surface-elevated: #14161C;
+  --color-surface-glass: rgba(15, 17, 21, 0.72);
+
+  --color-fg: #FFFFFF;
+  --color-fg-muted: #94A3B8;
+  --color-fg-dim: #64748B;
+
+  --color-border: #1E293B;
+  --color-border-hover: rgba(247, 147, 26, 0.50);
+  --color-border-active: #F7931A;
+
+  --color-primary: #F7931A;
+  --color-primary-hover: #EA580C;
+  --color-primary-glow: rgba(247, 147, 26, 0.25);
+  --color-primary-glow-strong: rgba(247, 147, 26, 0.40);
+
+  --color-gold: #FFD600;
+  --color-gold-glow: rgba(255, 214, 0, 0.20);
+
+  --color-success: #10B981;
+  --color-danger: #EF4444;
+  --color-warning: #F59E0B;
+
+  /* --- Typography --- */
+  --font-heading: 'Space Grotesk', sans-serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  /* --- Spacing Scale (Tailwind defaults extended) --- */
+  --spacing-18: 4.5rem;
+  --spacing-22: 5.5rem;
+}
+
+/* ============================================================
+   Global Reset & Base
+   ============================================================ */
+html, body, #root {
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-bg);
+  color: var(--color-fg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* --- Headings --- */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  letter-spacing: -0.02em;
+}
+
+/* --- Monospace for metrics --- */
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+/* ============================================================
+   Background System — Never flat, always alive
+   ============================================================ */
+.bg-df {
+  background-color: var(--color-bg);
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(247, 147, 26, 0.08), transparent),
+    radial-gradient(ellipse 60% 40% at 80% 90%, rgba(255, 214, 0, 0.04), transparent);
+}
+
+.bg-surface-df {
+  background-color: var(--color-surface);
+  background-image:
+    radial-gradient(ellipse 100% 100% at 0% 0%, rgba(247, 147, 26, 0.03), transparent 50%);
+}
+
+.bg-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* ============================================================
+   Scrollbar
+   ============================================================ */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.25);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(247, 147, 26, 0.50);
+}
+
+/* ============================================================
+   Animations
+   ============================================================ */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-16px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 12px rgba(247, 147, 26, 0.20); }
+  50% { box-shadow: 0 0 24px rgba(247, 147, 26, 0.40); }
+}
+
+@keyframes dash {
+  to { stroke-dashoffset: -16; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+.animate-slide-in-left {
+  animation: slideInLeft 0.4s ease-out forwards;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2.5s ease-in-out infinite;
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+/* Flow line for pipeline */
+.flow-line {
+  stroke-dasharray: 8;
+  animation: dash 1s linear infinite;
+}
+
+/* ============================================================
+   Component Primitives
+   ============================================================ */
+
+/* --- Card / Block --- */
+.card-df {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.card-df:hover {
+  border-color: var(--color-border-hover);
+  box-shadow: 0 0 24px rgba(247, 147, 26, 0.10), 0 8px 32px rgba(0, 0, 0, 0.4);
+  transform: translateY(-2px);
+}
+
+/* --- Glass Card --- */
+.glass-df {
+  background: var(--color-surface-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+}
+
+/* --- Button: Primary (Gradient Orange, Pill, Glow) --- */
+.btn-primary {
+  background: linear-gradient(135deg, #F7931A 0%, #EA580C 100%);
+  color: #fff;
+  font-weight: 600;
+  padding: 0.5rem 1.25rem;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 16px rgba(247, 147, 26, 0.30);
+}
+.btn-primary:hover {
+  box-shadow: 0 6px 24px rgba(247, 147, 26, 0.50);
+  transform: translateY(-1px);
+}
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+/* --- Button: Secondary (Transparent + subtle border) --- */
+.btn-secondary {
+  background: transparent;
+  color: var(--color-fg-muted);
+  font-weight: 500;
+  padding: 0.5rem 1.25rem;
+  border-radius: 9999px;
+  border: 1px solid var(--color-border);
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+.btn-secondary:hover {
+  border-color: var(--color-border-hover);
+  color: var(--color-fg);
+  background: rgba(247, 147, 26, 0.06);
+}
+
+/* --- Button: Ghost --- */
+.btn-ghost {
+  background: transparent;
+  color: var(--color-fg-muted);
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btn-ghost:hover {
+  color: var(--color-fg);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* --- Input (Terminal-inspired) --- */
+.input-df {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 0.5rem 0.875rem;
+  color: var(--color-fg);
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  outline: none;
+  transition: all 0.2s ease;
+}
+.input-df::placeholder {
+  color: var(--color-fg-dim);
+}
+.input-df:focus {
+  border-color: var(--color-border-active);
+  box-shadow: 0 0 0 3px rgba(247, 147, 26, 0.15);
+}
+
+/* --- Status Dots --- */
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.status-dot.running {
+  background: var(--color-primary);
+  box-shadow: 0 0 8px rgba(247, 147, 26, 0.60);
+  animation: pulse-glow 2s infinite;
+}
+.status-dot.success {
+  background: var(--color-success);
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.40);
+}
+.status-dot.error {
+  background: var(--color-danger);
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.40);
+}
+.status-dot.pending {
+  background: var(--color-fg-dim);
+}
+
+/* --- Badge --- */
+.badge-df {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  border: 1px solid var(--color-border);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--color-fg-muted);
+}
+
+/* --- Table --- */
+.table-df {
+  width: 100%;
+  font-size: 0.8125rem;
+  border-collapse: collapse;
+}
+.table-df thead tr {
+  border-bottom: 1px solid var(--color-border);
+}
+.table-df th {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  font-weight: 500;
+  color: var(--color-fg-muted);
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.table-df tbody tr {
+  border-bottom: 1px solid rgba(30, 41, 59, 0.6);
+  transition: background 0.15s ease;
+}
+.table-df tbody tr:hover {
+  background: rgba(247, 147, 26, 0.04);
+}
+.table-df td {
+  padding: 0.75rem 1rem;
+  color: var(--color-fg);
+}
+
+/* --- Divider / Separator --- */
+.sep-df {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-border), transparent);
+}
+
+/* ============================================================
+   Reduced Motion
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
