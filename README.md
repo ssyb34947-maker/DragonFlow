@@ -170,10 +170,10 @@ data/processed/
 |---|---|---|---|---|
 | 中证2000成分股 | ✅ 100% | `data/raw/csi2000/constituents_932000_*.csv` | 2000 | 中证指数 `index_stock_cons_csindex` |
 | **个股日线** (前复权) | ✅ **100%** | `data/raw/stock_daily/qfq/*.csv` + `data/processed/stock_daily_csi2000_qfq_*.csv/.parquet` | 2000 只 / 189,811 行 | EM `stock_zh_a_hist` 优先 + 新浪 `stock_zh_a_daily` 兜底 |
-| 中证2000指数日线（官方） | ❌ 0 | 无（EM `push2his` 持续断流，新浪 csi2000 入口 akshare 内部报错） | — | — |
-| **中证2000指数日线（本地代理）** | ✅ 替代 | `data/processed/index_daily_932000_proxy_equal_weight_*.csv/.parquet` | 94 | `computed_local_equal_weight_proxy`（成分股等权日收益累乘） |
-| 个股基础信息 | ⚠️ 47% | `data/raw/fundamental/stock_info_csi2000_*.csv` + `data/processed/stock_info_csi2000_latest.parquet` | 938 / 2000 | EM `stock_individual_info_em`，剩 1062 只期间被代理断流 |
-| 截面快照（官方） | ❌ 0 | 无（EM 分页中途被掐） | — | — |
+| **中证2000指数日线（官方）** | ✅ **100%** | `data/raw/csi2000/index_daily_932000_*.csv/.parquet` | **95** | EM `stock_zh_index_daily_em(csi932000)` |
+| 中证2000指数日线（本地代理） | ✅ 备用 | `data/processed/index_daily_932000_proxy_equal_weight_*.csv/.parquet` | 94 | `computed_local_equal_weight_proxy`（成分股等权日收益累乘）—— 与官方版并存供对照 |
+| 个股基础信息 | ⚠️ 68.6% | `data/raw/fundamental/stock_info_csi2000_*.csv` + `data/processed/stock_info_csi2000_latest.parquet` | **1371 / 2000** | EM `stock_individual_info_em`，剩 629 只仍受代理偶发断流影响 |
+| 截面快照（官方） | ❌ 0 | 无（EM `82.push2` 子域分页第 4-10 页必断；akshare 没有可分批的替代接口） | — | — |
 | **截面快照（本地合成）** | ✅ 替代 | `data/processed/stock_spot_snapshot_csi2000_latest.csv/.parquet` | 2000 | `derived_from_last_daily_row`（取每只股票合并长表里最后一个交易日的数据） |
 | 利润表 (2026Q1) | ✅ | `data/raw/fundamental/profit_20260331.csv` + 合并到 `fundamental_csi2000_latest.*` | ~2000 | EM `stock_lrb_em` |
 | 资产负债表 (2026Q1) | ✅ | `data/raw/fundamental/balance_20260331.csv` + 合并到 `fundamental_csi2000_latest.*` | ~2000 | EM `stock_zcfz_em` |
@@ -198,24 +198,24 @@ uv run python scripts/04_synthesize_spot_snapshot.py
 
 ### 想再补齐的数据该怎么做
 
-1. **stock_info 剩 1062 只**：等本机对 `push2.eastmoney.com` 网络恢复，再跑一次主脚本即可（脚本会跳过已存在的，但 stock_info 没有"已下载"检查，会全部重跑——可以接受，因为耗时 ~30 min 而已）：
+1. **stock_info 剩 629 只**：直接跑 `_oneshot_fill_stock_info.py`，它会读现有 CSV 并只查缺失的成分股（增量、可重复运行）：
    ```bash
-   uv run python scripts/01_download_csi2000_data.py \
-     --start-date 2026-01-01 --end-date 2026-05-31 \
-     --index-code 932000 --adjust qfq --sleep 0.4
+   uv run python scripts/_oneshot_fill_stock_info.py
    ```
-2. **指数官方日线 / 截面快照官方版**：等 `push2his.eastmoney.com` 恢复后单跑：
+2. **官方指数日线（如果之后被刷新或要换日期）**：跑 `_oneshot_fetch_index.py`，含多次重试：
+   ```bash
+   uv run python scripts/_oneshot_fetch_index.py
+   ```
+3. **官方截面快照**：等 `82.push2.eastmoney.com` 恢复后跑：
    ```bash
    uv run python -c "
    import sys; sys.path.insert(0,'src')
-   from dragonflow.data.download import download_index_daily, download_spot_snapshot
-   df1, _ = download_index_daily('932000', '2026-01-01', '2026-05-31')
-   df1.to_csv('data/raw/csi2000/index_daily_932000_20260101_20260531.csv', index=False, encoding='utf-8-sig')
-   df1.to_parquet('data/raw/csi2000/index_daily_932000_20260101_20260531.parquet')
    import pandas as pd
+   from dragonflow.data.download import download_spot_snapshot
    cons = pd.read_csv('data/raw/csi2000/constituents_932000_latest.csv', dtype={'stock_code':str}, encoding='utf-8-sig')
-   df2, _ = download_spot_snapshot(constituent_codes=cons['stock_code'])
-   df2.to_csv('data/processed/stock_spot_snapshot_csi2000_official.csv', index=False, encoding='utf-8-sig')
+   df, _ = download_spot_snapshot(constituent_codes=cons['stock_code'])
+   df.to_csv('data/processed/stock_spot_snapshot_csi2000_official.csv', index=False, encoding='utf-8-sig')
+   df.to_parquet('data/processed/stock_spot_snapshot_csi2000_official.parquet', index=False)
    "
    ```
 

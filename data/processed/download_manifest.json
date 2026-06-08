@@ -1,6 +1,6 @@
 {
   "run_time": "2026-06-08 13:51:03",
-  "finish_time": "2026-06-08 14:28:45",
+  "finish_time": "2026-06-08 15:09:00",
   "start_date": "2026-01-01",
   "end_date": "2026-05-31",
   "index_code": "932000",
@@ -8,9 +8,9 @@
   "n_constituents": 2000,
   "n_stock_daily_success": 2000,
   "n_stock_daily_failed": 0,
-  "n_index_daily_rows": 0,
+  "n_index_daily_rows": 95,
   "n_stock_daily_rows": 189811,
-  "n_stock_info_rows": 938,
+  "n_stock_info_rows": 1371,
   "n_fundamental_rows": 5874,
   "warnings": [],
   "output_files": [
@@ -26,6 +26,8 @@
     "D:\\Python Project\\DragonFlow\\data\\processed\\fundamental_csi2000_latest.csv",
     "D:\\Python Project\\DragonFlow\\data\\processed\\fundamental_csi2000_latest.parquet",
     "D:\\Python Project\\DragonFlow\\data\\processed\\download_errors.csv",
-    "D:\\Python Project\\DragonFlow\\data\\processed\\data_coverage_report.csv"
+    "D:\\Python Project\\DragonFlow\\data\\processed\\data_coverage_report.csv",
+    "D:\\Python Project\\DragonFlow\\data\\raw\\csi2000\\index_daily_932000_20260101_20260531.csv",
+    "D:\\Python Project\\DragonFlow\\data\\raw\\csi2000\\index_daily_932000_20260101_20260531.parquet"
   ]
 }
