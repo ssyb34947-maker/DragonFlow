@@ -1,25 +1,33 @@
 {
-  "run_time": "2026-06-08 13:42:32",
-  "finish_time": "2026-06-08 13:42:32",
+  "run_time": "2026-06-08 13:51:03",
+  "finish_time": "2026-06-08 15:09:00",
   "start_date": "2026-01-01",
   "end_date": "2026-05-31",
   "index_code": "932000",
   "adjust": "qfq",
-  "mode": "finalize_partial",
   "n_constituents": 2000,
   "n_stock_daily_success": 2000,
   "n_stock_daily_failed": 0,
-  "n_index_daily_rows": 0,
+  "n_index_daily_rows": 95,
   "n_stock_daily_rows": 189811,
-  "n_stock_info_rows": 0,
-  "n_fundamental_rows": 0,
-  "warnings": [
-    "本次为本地 finalize_partial 模式：未补刷指数行情/基础信息/财报/快照",
-    "成分股下载失败 0/2000 (0.0%)，原因记录于 download_errors.csv"
-  ],
+  "n_stock_info_rows": 1371,
+  "n_fundamental_rows": 5874,
+  "warnings": [],
   "output_files": [
+    "D:\\Python Project\\DragonFlow\\data\\raw\\csi2000\\constituents_932000_20260608.csv",
+    "D:\\Python Project\\DragonFlow\\data\\raw\\csi2000\\constituents_932000_latest.csv",
     "D:\\Python Project\\DragonFlow\\data\\processed\\stock_daily_csi2000_qfq_20260101_20260531.csv",
     "D:\\Python Project\\DragonFlow\\data\\processed\\stock_daily_csi2000_qfq_20260101_20260531.parquet",
-    "D:\\Python Project\\DragonFlow\\data\\processed\\data_coverage_report.csv"
+    "D:\\Python Project\\DragonFlow\\data\\raw\\fundamental\\stock_info_csi2000_20260608.csv",
+    "D:\\Python Project\\DragonFlow\\data\\processed\\stock_info_csi2000_latest.parquet",
+    "D:\\Python Project\\DragonFlow\\data\\raw\\fundamental\\profit_20260331.csv",
+    "D:\\Python Project\\DragonFlow\\data\\raw\\fundamental\\balance_20260331.csv",
+    "D:\\Python Project\\DragonFlow\\data\\raw\\fundamental\\cashflow_20260331.csv",
+    "D:\\Python Project\\DragonFlow\\data\\processed\\fundamental_csi2000_latest.csv",
+    "D:\\Python Project\\DragonFlow\\data\\processed\\fundamental_csi2000_latest.parquet",
+    "D:\\Python Project\\DragonFlow\\data\\processed\\download_errors.csv",
+    "D:\\Python Project\\DragonFlow\\data\\processed\\data_coverage_report.csv",
+    "D:\\Python Project\\DragonFlow\\data\\raw\\csi2000\\index_daily_932000_20260101_20260531.csv",
+    "D:\\Python Project\\DragonFlow\\data\\raw\\csi2000\\index_daily_932000_20260101_20260531.parquet"
   ]
 }

@@ -68,11 +68,14 @@ pip install -e .
 
 - **AkShare**（封装东方财富 / 中证指数 / 新浪等接口）
 - 成分股：`index_stock_cons_csindex` → `index_stock_cons` → `index_stock_cons_sina` 自动 fallback
-- 指数行情：`stock_zh_index_daily_em` 自动尝试 `csi932000 / sh932000 / 932000` 等 symbol
-- 个股日线：`stock_zh_a_hist`，默认 **前复权 qfq**
+- 指数行情：`index_zh_a_hist` → `stock_zh_index_daily_em` → 新浪 `stock_zh_index_daily` 自动 fallback
+- 个股日线：**主源** `stock_zh_a_hist`（EM 前复权），**备源** `stock_zh_a_daily`（新浪），单只失败自动降级
 - 个股基础信息：`stock_individual_info_em`
 - 截面快照：`stock_zh_a_spot_em` 过滤成分股
 - 财报：`stock_lrb_em` / `stock_zcfz_em` / `stock_xjll_em`，优先 `20260331`，自动回退 `20251231 / 20250930 / 20250630`
+
+> ⚠️ **AkShare 大量接口依赖 `*.eastmoney.com` 的 `push2his` 子域名**。如果本机代理 / 防火墙对该域名间歇性掐流，**指数行情**与**个股 K 线**都会失败。
+> 这就是为什么我们给个股日线加了**新浪 fallback**（已稳定补齐 2000/2000），并给指数行情加了**本地等权重代理合成**（见下）作为兜底。
 
 ### 默认时间窗口
 
@@ -154,4 +157,77 @@ data/processed/
 
 - 不计算收益率 / 波动率 / 最大回撤 / FFT / PCA / 聚类
 - 不修改 Streamlit 前端
-- 不把大型原始数据提交到 git（已在 `.gitignore` 排除 `data/raw` 与 `data/processed`）
+- 不把大型原始数据提交到 git（默认 `.gitignore` 排除 `data/raw` 与 `data/processed`；当前仓库的数据快照是手动 `git add -f` 上传的）
+
+---
+
+## 当前仓库里已经有什么数据（2026-06-08 快照）
+
+这一份数据是 2026-01 ~ 05 的 csi2000 行情画像所需的全部"第一步"产出，**下一位同学 clone 之后无需再下载**就能直接开干。
+某些数据因 EM 代理偶发掐流没能拿到官方版，已用本地合成代理顶替——具体见下表："来源"列里凡是 `computed_local_*` / `derived_from_*` 的都是本地合成产物，**不是官方接口数据**，做学术报告时请如实标注。
+
+| 数据 | 状态 | 文件 | 行数 | 来源 |
+|---|---|---|---|---|
+| 中证2000成分股 | ✅ 100% | `data/raw/csi2000/constituents_932000_*.csv` | 2000 | 中证指数 `index_stock_cons_csindex` |
+| **个股日线** (前复权) | ✅ **100%** | `data/raw/stock_daily/qfq/*.csv` + `data/processed/stock_daily_csi2000_qfq_*.csv/.parquet` | 2000 只 / 189,811 行 | EM `stock_zh_a_hist` 优先 + 新浪 `stock_zh_a_daily` 兜底 |
+| **中证2000指数日线（官方）** | ✅ **100%** | `data/raw/csi2000/index_daily_932000_*.csv/.parquet` | **95** | EM `stock_zh_index_daily_em(csi932000)` |
+| 中证2000指数日线（本地代理） | ✅ 备用 | `data/processed/index_daily_932000_proxy_equal_weight_*.csv/.parquet` | 94 | `computed_local_equal_weight_proxy`（成分股等权日收益累乘）—— 与官方版并存供对照 |
+| 个股基础信息 | ⚠️ 68.6% | `data/raw/fundamental/stock_info_csi2000_*.csv` + `data/processed/stock_info_csi2000_latest.parquet` | **1371 / 2000** | EM `stock_individual_info_em`，剩 629 只仍受代理偶发断流影响 |
+| 截面快照（官方） | ❌ 0 | 无（EM `82.push2` 子域分页第 4-10 页必断；akshare 没有可分批的替代接口） | — | — |
+| **截面快照（本地合成）** | ✅ 替代 | `data/processed/stock_spot_snapshot_csi2000_latest.csv/.parquet` | 2000 | `derived_from_last_daily_row`（取每只股票合并长表里最后一个交易日的数据） |
+| 利润表 (2026Q1) | ✅ | `data/raw/fundamental/profit_20260331.csv` + 合并到 `fundamental_csi2000_latest.*` | ~2000 | EM `stock_lrb_em` |
+| 资产负债表 (2026Q1) | ✅ | `data/raw/fundamental/balance_20260331.csv` + 合并到 `fundamental_csi2000_latest.*` | ~2000 | EM `stock_zcfz_em` |
+| 现金流量表 (2026Q1) | ✅ | `data/raw/fundamental/cashflow_20260331.csv` + 合并到 `fundamental_csi2000_latest.*` | ~2000 | EM `stock_xjll_em` |
+
+报告与日志：
+- `data/processed/download_manifest.json` — 每次主脚本运行的元数据
+- `data/processed/download_errors.csv` — 失败明细（stage / stock_code / error_type / error_message / time）
+- `data/processed/data_coverage_report.csv` — 每只成分股的覆盖率（n_daily_rows / first_date / last_date / missing_ratio / download_success）
+
+### 本地合成产物的脚本
+
+```bash
+# 等权重 csi2000 代理指数（依赖合并长表）
+uv run python scripts/03_synthesize_index_proxy.py
+
+# 截面快照（取每只股票最后一个交易日）
+uv run python scripts/04_synthesize_spot_snapshot.py
+```
+
+两个合成脚本都是**只读 + 输出到 `data/processed/`**，可以随时安全重跑。
+
+### 想再补齐的数据该怎么做
+
+1. **stock_info 剩 629 只**：直接跑 `_oneshot_fill_stock_info.py`，它会读现有 CSV 并只查缺失的成分股（增量、可重复运行）：
+   ```bash
+   uv run python scripts/_oneshot_fill_stock_info.py
+   ```
+2. **官方指数日线（如果之后被刷新或要换日期）**：跑 `_oneshot_fetch_index.py`，含多次重试：
+   ```bash
+   uv run python scripts/_oneshot_fetch_index.py
+   ```
+3. **官方截面快照**：等 `82.push2.eastmoney.com` 恢复后跑：
+   ```bash
+   uv run python -c "
+   import sys; sys.path.insert(0,'src')
+   import pandas as pd
+   from dragonflow.data.download import download_spot_snapshot
+   cons = pd.read_csv('data/raw/csi2000/constituents_932000_latest.csv', dtype={'stock_code':str}, encoding='utf-8-sig')
+   df, _ = download_spot_snapshot(constituent_codes=cons['stock_code'])
+   df.to_csv('data/processed/stock_spot_snapshot_csi2000_official.csv', index=False, encoding='utf-8-sig')
+   df.to_parquet('data/processed/stock_spot_snapshot_csi2000_official.parquet', index=False)
+   "
+   ```
+
+### 下一位同学可以直接开始的画像工作
+
+成分股、个股日线、财报三表、个股基础信息（≥47%）、合成代理指数、合成快照——这些组合起来已经可以支持以下分析：
+
+- **收益 / 趋势**：从 `stock_daily_csi2000_qfq_*.parquet` 起步，按 stock_code 分组算累计收益、N 日动量、SMA/EMA 斜率
+- **相对市场**：以 `index_daily_932000_proxy_equal_weight_*.parquet` 为基准，计算个股超额、Beta、相关系数
+- **波动 / 风险**：日波动率、下行波动、最大回撤、Calmar、Sharpe
+- **流动性**：换手率分位、`amount` / `amplitude` 截面分布
+- **截面特征**：用 `fundamental_csi2000_latest.parquet` 接入 ROE / 资产负债率 / 营收同比等做"基本面分层"
+- **形态聚类**：每只标准化日收益曲线 → PCA → KMeans/DBSCAN 给出"龙头形态 / 震荡形态 / 破位形态"等标签
+
+所有 schema 字段命名见 `src/dragonflow/data/schema.py`，加载方式见 `src/dragonflow/utils/io.py`（`load_csv_codes` 自动把 `stock_code` 保留为 6 位字符串）。
