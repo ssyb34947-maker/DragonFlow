@@ -9,7 +9,6 @@ import {
   Search,
   Menu,
   X,
-  Flame,
   BrainCircuit,
 } from 'lucide-react'
 import { useState } from 'react'
@@ -43,13 +42,8 @@ export default function Layout() {
       >
         {/* Logo */}
         <div className="flex items-center gap-3 px-4 h-16 border-b border-border/60">
-          <div
-            className="flex items-center justify-center w-9 h-9 rounded-xl animate-pulse-glow"
-            style={{
-              background: 'linear-gradient(135deg, #F7931A 0%, #EA580C 100%)',
-            }}
-          >
-            <Flame className="w-5 h-5 text-white" />
+          <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl border border-primary/25 bg-white/[0.04] animate-pulse-glow">
+            <img src="/logo.png" alt="DragonFlow logo" className="h-full w-full object-contain p-1" />
           </div>
           <AnimatePresence>
             {sidebarOpen && (

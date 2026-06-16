@@ -88,6 +88,11 @@ export default function HomePage() {
             <Shield className="w-3.5 h-3.5 text-primary" />
             <span>西南财经大学 · 金融大数据分析与数据可视化课程项目</span>
           </div>
+          <img
+            src="/logo.png"
+            alt="DragonFlow logo"
+            className="mx-auto mb-5 h-20 w-20 rounded-2xl border border-primary/25 bg-white/[0.04] object-contain p-2 shadow-[0_0_28px_rgba(247,147,26,0.18)]"
+          />
           <h1
             className="text-6xl font-bold mb-4 tracking-tight"
             style={{
