@@ -86,7 +86,7 @@ export default function HomePage() {
         >
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full badge-df mb-6">
             <Shield className="w-3.5 h-3.5 text-primary" />
-            <span>西南财经大学 · 数据可视化课程项目</span>
+            <span>西南财经大学 · 金融大数据分析与数据可视化课程项目</span>
           </div>
           <h1
             className="text-6xl font-bold mb-4 tracking-tight"
@@ -100,7 +100,7 @@ export default function HomePage() {
             DragonFlow
           </h1>
           <p className="text-lg text-fg-muted max-w-2xl mx-auto leading-relaxed">
-            A股龙头/热点股数据可视化分析系统。帮助用户快速复盘过往市场走势，
+            A股龙头/热点股金融大数据分析与数据可视化系统。帮助用户快速复盘过往市场走势，
             识别热点板块与龙头股。
           </p>
         </motion.div>

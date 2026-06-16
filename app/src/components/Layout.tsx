@@ -65,7 +65,7 @@ export default function Layout() {
                 >
                   DragonFlow
                 </h1>
-                <p className="text-[10px] text-fg-dim">A股龙头数据可视化</p>
+                <p className="text-[10px] text-fg-dim">A股金融大数据分析</p>
               </motion.div>
             )}
           </AnimatePresence>
@@ -143,7 +143,7 @@ export default function Layout() {
                 exit={{ opacity: 0 }}
                 className="text-[10px] text-fg-dim text-center"
               >
-                西南财经大学 · 数据可视化课程
+                西南财经大学 · 金融大数据分析与数据可视化课程
               </motion.div>
             )}
           </AnimatePresence>

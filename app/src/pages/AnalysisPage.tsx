@@ -129,7 +129,7 @@ export default function AnalysisPage() {
         >
           分析算法
         </h1>
-        <p className="text-fg-muted mt-1">数据可视化分析与机器学习算法</p>
+        <p className="text-fg-muted mt-1">金融大数据分析与数据可视化算法</p>
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
