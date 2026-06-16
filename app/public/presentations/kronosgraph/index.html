@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DragonFlow-KronosGraph 模型方案</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <main class="deck" aria-live="polite">
+    <header class="deck-topbar">
+      <div class="brand-mark" aria-hidden="true">DF</div>
+      <div>
+        <div class="eyebrow">DragonFlow Quant Research</div>
+        <div class="deck-title">KronosGraph 模型方案</div>
+      </div>
+      <div class="progress-wrap" aria-label="播放进度">
+        <div id="progressBar" class="progress-bar"></div>
+      </div>
+      <div id="slideCounter" class="slide-counter">01 / 12</div>
+    </header>
+
+    <section id="slides" class="slides">
+      <article class="slide active" data-title="封面">
+        <div class="hero-grid">
+          <div>
+            <p class="section-kicker">CSI2000 · K-line · Graph · Temporal Fusion</p>
+            <h1>DragonFlow-<span>KronosGraph</span></h1>
+            <p class="hero-copy">一套面向中证 2000 的谱聚类关系嵌入、K 线形态编码与轻量时序预测框架。</p>
+            <div class="hero-actions">
+              <a class="button primary" href="/docs/training_guide_kronosgraph_v1.md">训练文档</a>
+              <a class="button" href="/model">前端模型板块</a>
+            </div>
+          </div>
+          <div class="system-card">
+            <div class="pulse-line"></div>
+            <div class="metric-row"><span>Universe</span><strong>CSI2000</strong></div>
+            <div class="metric-row"><span>Panel</span><strong>189,811 rows</strong></div>
+            <div class="metric-row"><span>Target</span><strong>5D Excess Return</strong></div>
+            <div class="metric-row"><span>Model</span><strong>K-line + Graph + TFT</strong></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="slide" data-title="问题定义">
+        <h2>问题定义</h2>
+        <div class="two-col">
+          <div class="panel">
+            <h3>预测目标</h3>
+            <p>在交易日 <code>t</code> 收盘后生成信号，预测 <code>t+1</code> 到 <code>t+5</code> 的个股超额收益。</p>
+            <pre>target = stock_ret_fwd_5d - index_ret_fwd_5d</pre>
+          </div>
+          <div class="panel accent">
+            <h3>交易约束</h3>
+            <ul>
+              <li>避免同收盘价成交泄漏</li>
+              <li>用下一交易日作为执行起点</li>
+              <li>只使用预测日可见信息</li>
+              <li>先做 Top-K 多头原型</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="slide" data-title="整体架构">
+        <h2>端到端架构</h2>
+        <div class="flow">
+          <div class="node">日线行情<br><small>OHLCVA</small></div>
+          <div class="arrow"></div>
+          <div class="node">特征面板<br><small>rolling / market</small></div>
+          <div class="arrow"></div>
+          <div class="node gold">K 线编码<br><small>Kronos-inspired</small></div>
+          <div class="arrow"></div>
+          <div class="node purple">谱聚类嵌入<br><small>stock graph</small></div>
+          <div class="arrow"></div>
+          <div class="node">轻量 TFT<br><small>quantiles</small></div>
+          <div class="arrow"></div>
+          <div class="node success">回测<br><small>Top-K portfolio</small></div>
+        </div>
+      </article>
+
+      <article class="slide" data-title="数据与切分">
+        <h2>数据与时间切分</h2>
+        <div class="timeline">
+          <div style="--w:40%"><strong>0-39</strong><span>预热</span></div>
+          <div style="--w:25%"><strong>40-64</strong><span>训练</span></div>
+          <div style="--w:15%"><strong>65-79</strong><span>验证</span></div>
+          <div style="--w:10%"><strong>80-89</strong><span>测试</span></div>
+          <div style="--w:10%"><strong>90-94</strong><span>预测展示</span></div>
+        </div>
+        <div class="stats-grid">
+          <div><strong>2000</strong><span>股票</span></div>
+          <div><strong>95</strong><span>交易日</span></div>
+          <div><strong>82+</strong><span>基础列</span></div>
+          <div><strong>177,813</strong><span>有效标签</span></div>
+        </div>
+      </article>
+
+      <article class="slide" data-title="K线建模">
+        <h2>Kronos 启发的 K 线编码</h2>
+        <div class="two-col">
+          <div class="panel">
+            <h3>K 线形态语言</h3>
+            <ul>
+              <li><code>k_body</code> 实体强度</li>
+              <li><code>k_range</code> 日内振幅</li>
+              <li><code>k_upper_shadow</code> 上影线</li>
+              <li><code>k_lower_shadow</code> 下影线</li>
+              <li><code>k_gap</code> 隔夜跳空</li>
+            </ul>
+          </div>
+          <div class="panel code-panel">
+            <h3>轻量编码器</h3>
+            <pre>d_model: 24
+n_heads: 2
+n_layers: 1
+output: kline_emb_1...4</pre>
+          </div>
+        </div>
+      </article>
+
+      <article class="slide" data-title="股票图">
+        <h2>谱聚类股票关系图</h2>
+        <div class="graph-demo" aria-hidden="true">
+          <span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span><span class="dot d4"></span><span class="dot d5"></span>
+          <svg viewBox="0 0 620 260"><path d="M88 64 L246 110 L398 62 L520 172 L302 204 L88 64 M246 110 L302 204 M398 62 L302 204" /></svg>
+        </div>
+        <p class="center-copy">用过去窗口收益相关性构建稀疏图，提取 <code>spectral_emb_1...8</code> 和 <code>cluster_id</code>，再生成同簇收益/成交上下文。</p>
+      </article>
+
+      <article class="slide" data-title="模型输出">
+        <h2>输出与交易打分</h2>
+        <div class="formula-card">
+          <pre>alpha = pred_q50_excess_ret_fwd_5d
+uncertainty = pred_q90 - pred_q10
+score = alpha / (uncertainty + 1e-6)</pre>
+        </div>
+        <div class="three-col">
+          <div><strong>Q10</strong><span>下行过滤</span></div>
+          <div><strong>Q50</strong><span>主收益预测</span></div>
+          <div><strong>Q90</strong><span>上行情景</span></div>
+        </div>
+      </article>
+
+      <article class="slide" data-title="配置解耦">
+        <h2>配置完全解耦</h2>
+        <div class="panel wide">
+          <pre>configs/model_v1.yaml
+├─ spectral: graph_window / embedding_dim / k_min / k_max
+├─ kline_encoder: d_model / n_heads / n_layers / batch_size
+├─ model: encoder_length / quantiles / learning_rate / device
+└─ backtest: top_n / cost / liquidity / rebalance</pre>
+        </div>
+      </article>
+
+      <article class="slide" data-title="训练命令">
+        <h2>服务器训练顺序</h2>
+        <div class="terminal">
+          <p>uv run python scripts/07_build_model_dataset.py</p>
+          <p>uv run python scripts/08_spectral_embedding.py --config configs/model_v1.yaml</p>
+          <p>uv run python scripts/09_train_kline_encoder.py --config configs/model_v1.yaml</p>
+          <p>uv run python scripts/10_train_tft.py --config configs/model_v1.yaml</p>
+          <p>uv run python scripts/11_predict_tft.py --range test</p>
+          <p>uv run python scripts/12_backtest_strategy.py</p>
+        </div>
+      </article>
+
+      <article class="slide" data-title="产物">
+        <h2>训练与回测产物</h2>
+        <div class="artifact-grid">
+          <div><strong>model_panel_tft.parquet</strong><span>主模型训练输入</span></div>
+          <div><strong>kline_encoder.ckpt</strong><span>K 线编码器权重</span></div>
+          <div><strong>model.ckpt</strong><span>主预测模型权重</span></div>
+          <div><strong>tft_predictions.parquet</strong><span>分位数预测结果</span></div>
+          <div><strong>backtest_nav.parquet</strong><span>策略净值曲线</span></div>
+          <div><strong>backtest_metrics.json</strong><span>核心回测指标</span></div>
+        </div>
+      </article>
+
+      <article class="slide" data-title="风险边界">
+        <h2>风险边界</h2>
+        <div class="risk-list">
+          <p><strong>历史过短：</strong>当前 95 个交易日只适合原型验证。</p>
+          <p><strong>财报暂缓：</strong>V1 不把财报数值作为核心输入，避免 point-in-time 泄漏。</p>
+          <p><strong>模型从小开始：</strong>一层 Transformer，补足多年历史后再放大。</p>
+          <p><strong>回测保守：</strong>信号按下一交易日执行，加入成本和流动性过滤。</p>
+        </div>
+      </article>
+
+      <article class="slide" data-title="下一步">
+        <h2>下一步</h2>
+        <div class="next-grid">
+          <div><span>01</span><strong>服务器训练</strong><p>用 GPU 跑完整 08-12 链路。</p></div>
+          <div><span>02</span><strong>结果诊断</strong><p>检查 Rank IC、分组收益、回测净值。</p></div>
+          <div><span>03</span><strong>补长历史</strong><p>扩展至 2-3 年日频数据。</p></div>
+          <div><span>04</span><strong>财报增强</strong><p>接入 point-in-time 基本面。</p></div>
+        </div>
+      </article>
+    </section>
+
+    <footer class="deck-controls">
+      <button id="prevBtn" type="button" aria-label="上一页">←</button>
+      <div id="dots" class="dots" aria-label="幻灯片导航"></div>
+      <button id="nextBtn" type="button" aria-label="下一页">→</button>
+    </footer>
+  </main>
+  <script src="./slides.js"></script>
+</body>
+</html>

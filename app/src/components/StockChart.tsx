@@ -234,8 +234,7 @@ export default function StockChart({
 
     return {
       margin,
-      innerWidth,
-      mainTop,
+        mainTop,
       mainH,
       volTop,
       volH,
@@ -268,7 +267,6 @@ export default function StockChart({
 
   const {
     margin,
-    innerWidth,
     mainTop,
     mainH,
     volTop,

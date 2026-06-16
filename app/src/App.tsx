@@ -6,6 +6,7 @@ import ProcessPage from './pages/ProcessPage'
 import AnalysisPage from './pages/AnalysisPage'
 import DataExplorerPage from './pages/DataExplorerPage'
 import PipelinePage from './pages/PipelinePage'
+import ModelPage from './pages/ModelPage'
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <Route path="analysis" element={<AnalysisPage />} />
         <Route path="explorer" element={<DataExplorerPage />} />
         <Route path="pipeline" element={<PipelinePage />} />
+        <Route path="model" element={<ModelPage />} />
       </Route>
     </Routes>
   )

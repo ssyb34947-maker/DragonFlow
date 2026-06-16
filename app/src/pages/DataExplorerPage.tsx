@@ -21,8 +21,6 @@ import {
   EyeOff,
 } from 'lucide-react'
 import {
-  LineChart,
-  Line,
   XAxis,
   YAxis,
   CartesianGrid,

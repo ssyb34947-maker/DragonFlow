@@ -10,6 +10,7 @@ import {
   Menu,
   X,
   Flame,
+  BrainCircuit,
 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -19,6 +20,7 @@ const navItems = [
   { path: '/download', label: '数据下载', icon: Download },
   { path: '/process', label: '预处理', icon: Database },
   { path: '/analysis', label: '分析算法', icon: BarChart3 },
+  { path: '/model', label: '模型方案', icon: BrainCircuit },
   { path: '/explorer', label: '数据探索', icon: Search },
 ]
 

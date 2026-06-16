@@ -2,10 +2,6 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Play,
-  CheckCircle2,
-  XCircle,
-  Clock,
-  SkipForward,
   ChevronDown,
   ChevronRight,
   Terminal,

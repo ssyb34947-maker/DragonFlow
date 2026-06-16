@@ -11,6 +11,7 @@ import {
   Layers,
   Zap,
   Shield,
+  BrainCircuit,
 } from 'lucide-react'
 
 const features = [
@@ -31,6 +32,12 @@ const features = [
     title: '分析算法',
     desc: '收益率/波动率计算、PCA降维、聚类分析、龙头股识别',
     path: '/analysis',
+  },
+  {
+    icon: BrainCircuit,
+    title: '模型方案',
+    desc: 'DragonFlow-KronosGraph：KS-TFT模型、K线分词、谱聚类嵌入与回测架构',
+    path: '/model',
   },
   {
     icon: Search,
