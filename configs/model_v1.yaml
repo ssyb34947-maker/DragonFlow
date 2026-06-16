@@ -1,0 +1,77 @@
+# DragonFlow-KronosGraph V1 training config
+paths:
+  processed_dir: data/processed
+  model_dir: models/dragonflow_kronosgraph_v1
+  base_panel: data/processed/model_panel_base.parquet
+  spectral_embeddings: data/processed/spectral_embeddings.parquet
+  kline_embeddings: data/processed/kline_embeddings.parquet
+  tft_panel: data/processed/model_panel_tft.parquet
+  predictions: data/processed/tft_predictions.parquet
+  backtest_nav: data/processed/backtest_nav.parquet
+  backtest_positions: data/processed/backtest_positions.parquet
+  backtest_metrics: data/processed/backtest_metrics.json
+  feature_schema: data/processed/model_feature_schema_v1.json
+  time_split: data/processed/model_time_split_v1.json
+
+split:
+  warmup_time_idx: [0, 39]
+  train_time_idx: [40, 64]
+  valid_time_idx: [65, 79]
+  test_time_idx: [80, 89]
+  prediction_only_time_idx: [90, 94]
+
+spectral:
+  enabled: true
+  graph_window: 40
+  refit_every_n_days: 5
+  embedding_dim: 8
+  n_neighbors: 30
+  k_min: 8
+  k_max: 20
+  random_state: 42
+
+kline_encoder:
+  enabled: true
+  input_length: 30
+  output_dim: 4
+  d_model: 24
+  n_heads: 2
+  n_layers: 1
+  dim_feedforward: 48
+  dropout: 0.20
+  batch_size: 512
+  max_epochs: 8
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  device: auto
+  num_workers: 0
+  early_stop_patience: 3
+
+model:
+  encoder_length: 30
+  target_col: excess_ret_fwd_5d
+  quantiles: [0.1, 0.5, 0.9]
+  d_model: 48
+  n_heads: 2
+  n_layers: 1
+  dim_feedforward: 96
+  dropout: 0.20
+  static_hidden: 16
+  batch_size: 512
+  max_epochs: 12
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  gradient_clip_val: 1.0
+  device: auto
+  num_workers: 0
+  early_stop_patience: 4
+
+backtest:
+  rebalance_every_n_days: 5
+  top_n: 80
+  min_amount_mean_20d: 30000000
+  q10_floor: -0.03
+  buy_cost_bps: 10
+  sell_cost_bps: 10
+  slippage_bps: 5
+  initial_cash: 1.0
