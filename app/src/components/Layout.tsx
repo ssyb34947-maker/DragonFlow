@@ -10,6 +10,7 @@ import {
   Menu,
   X,
   BrainCircuit,
+  Activity,
 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -20,6 +21,7 @@ const navItems = [
   { path: '/process', label: '预处理', icon: Database },
   { path: '/analysis', label: '分析算法', icon: BarChart3 },
   { path: '/model', label: '模型方案', icon: BrainCircuit },
+  { path: '/data-flow', label: '数据流动画', icon: Activity },
   { path: '/explorer', label: '数据探索', icon: Search },
 ]
 

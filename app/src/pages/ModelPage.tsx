@@ -18,6 +18,7 @@ import {
   X,
   ZoomIn,
 } from 'lucide-react'
+import AuthorInfo from '../components/AuthorInfo'
 
 type ZoomTarget = {
   title: string
@@ -150,12 +151,13 @@ const evaluationSlots = [
 
 const claims = [
   ['研究问题', '短周期A股截面预测同时受到价格形态非平稳、股票关系迁移和样本窗口有限的约束。'],
-  ['核心假设', 'K线分词器提供局部价格语义，谱聚类嵌入提供横截面关系先验，TFT负责融合并输出可交易预测。'],
+  ['核心假设', 'K线分词器提供局部价格语义，谱聚类嵌入提供基本面关系先验，TFT负责融合并输出可交易预测。'],
   ['方法设计', 'KS-TFT 的完整方法名为 K-line Tokenizer and Spectral-enhanced Temporal Fusion Transformer，将K线分词、谱聚类嵌入和TFT融合为一套截面收益预测协议。'],
   ['验证方式', '采用时间外推切分、模块消融和成本后组合回测评估，不用训练集拟合结果替代交易验证。'],
 ]
 
 const configs = [
+  ['hardware', 'Nvidia RTX 3050 4GB / RAM 8GB+'],
   ['spectral', 'graph_window / embedding_dim / k_min-k_max'],
   ['kline_encoder', 'd_model / heads / layers / auxiliary heads'],
   ['fusion_model', 'encoder_length / quantiles / dropout / device'],
@@ -204,16 +206,19 @@ export default function ModelPage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-2 overflow-hidden rounded-lg border border-border bg-black/20">
-              {metrics.map(([label, value], index) => (
-                <div
-                  key={label}
-                  className={`border-border px-4 py-4 ${index < 2 ? 'border-b' : ''} ${index % 2 === 0 ? 'border-r' : ''}`}
-                >
-                  <div className="text-[11px] font-medium uppercase tracking-wider text-fg-dim">{label}</div>
-                  <div className="mt-2 font-mono text-lg font-semibold text-primary">{value}</div>
-                </div>
-              ))}
+            <div className="grid gap-4">
+              <AuthorInfo />
+              <div className="grid grid-cols-2 overflow-hidden rounded-lg border border-border bg-black/20">
+                {metrics.map(([label, value], index) => (
+                  <div
+                    key={label}
+                    className={`border-border px-4 py-4 ${index < 2 ? 'border-b' : ''} ${index % 2 === 0 ? 'border-r' : ''}`}
+                  >
+                    <div className="text-[11px] font-medium uppercase tracking-wider text-fg-dim">{label}</div>
+                    <div className="mt-2 font-mono text-lg font-semibold text-primary">{value}</div>
+                  </div>
+                ))}
+              </div>
             </div>
           </header>
 
@@ -233,14 +238,13 @@ export default function ModelPage() {
                   <div className="text-xs font-semibold uppercase tracking-wider text-primary">架构总览</div>
                   <h2 className="text-2xl font-bold text-fg">从数据面板到组合回测的闭环</h2>
                 </div>
-                <div className="font-mono text-xs text-fg-dim">OHLCV / K线分词 / 谱嵌入 / TFT / 回测</div>
+                <div className="font-mono text-xs text-fg-dim">OHLCV / K线分词 / 谱聚类增强嵌入 / TFT / 回测</div>
               </div>
               <button
                 type="button"
                 onClick={() =>
                   setZoomTarget({
                     title: 'KS-TFT 架构总览',
-                    subtitle: '从数据面板到组合回测的闭环',
                     imageSrc: '/assets/model/kronosgraph-architecture.png',
                     imageAlt: 'DragonFlow-KronosGraph 量化交易模型架构图',
                   })
