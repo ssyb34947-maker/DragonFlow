@@ -19,7 +19,7 @@
 
 A Visualization System for Market Leaders and Theme Rotation
 
-本项目为西南财经大学 《数据可视化》 课程项目。
+本项目为西南财经大学 《金融大数据分析与数据可视化》 课程项目。
 
 我们团队专注于对热点股、龙头股进行数据可视化分析，并提出了 `KSTFT` 方法用于构建增强指数，帮助用户快速复盘过往市场走势。
 
@@ -40,6 +40,7 @@ A Visualization System for Market Leaders and Theme Rotation
 | 数据处理  | Pandas           | 数据清洗、时间序列处理 |
 | 数值计算  | Numpy            | 指标计算        |
 | 数据分析  | Scikit-learn     | 机器学习数据分析 |
+| 深度学习  | Pytorch          | 深度学习框架 |
 | 静态可视化 | Matplotlib       | 数据科学统计图表 |
 | 高级可视化 | Pyecharts        | K线图/桑基图/热力图 |
 | Web展示 | Streamlit        | 可交互分析平台 |
