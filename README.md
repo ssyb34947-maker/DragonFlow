@@ -1,6 +1,12 @@
 <h1 align="center">DragonFlow</h1>
 
 <p align="center">
+<strong>
+本项目为西南财经大学 《金融大数据分析与数据可视化》 课程项目。
+</strong>
+</p>
+
+<p align="center">
 <a href="#">
 <img src="https://img.shields.io/badge/Deep-Learning-blue.svg" alt="Deep Learning" width="120" height="30">
 </a>
@@ -18,8 +24,6 @@
 
 
 A Visualization System for Market Leaders and Theme Rotation
-
-本项目为西南财经大学 《金融大数据分析与数据可视化》 课程项目。
 
 我们团队专注于对热点股、龙头股进行数据可视化分析，并提出了 `KSTFT` 方法用于构建增强指数，帮助用户快速复盘过往市场走势。
 
