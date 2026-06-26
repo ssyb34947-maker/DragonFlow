@@ -1,12 +1,39 @@
-## DragonFlow
+<h1 align="center">DragonFlow</h1>
+
+<p align="center">
+<strong>
+本项目为西南财经大学 《金融大数据分析与数据可视化》 课程项目。
+</strong>
+</p>
+
+<p align="center">
+<a href="#">
+<img src="https://img.shields.io/badge/Deep-Learning-blue.svg" alt="Deep Learning" width="120" height="30">
+</a>
+<a href="#">
+<img src="https://img.shields.io/badge/Python-12%2B-blue" alt="Python" width="120" height="30">
+</a>
+<a href="#">
+<img src="https://img.shields.io/badge/Finance-8%2B-blue" alt="Finance" width="120" height="30">
+</a>
+<a href="#">
+<img src="https://img.shields.io/badge/React-12%2B-blue" alt="React" width="120" height="30">
+</a>
+
+</p>
+
 
 A Visualization System for Market Leaders and Theme Rotation
 
-本项目为西南财经大学 《数据可视化》 课程项目。
-
-我们团队专注于对热点股、龙头股进行数据可视化分析，帮助用户快速复盘过往市场走势。
+我们团队专注于对热点股、龙头股进行数据可视化分析，并提出了 `KSTFT` 方法用于构建增强指数，帮助用户快速复盘过往市场走势。
 
 基于本项目，我们进行一次Demo Presentation。主题为：**《从夯到拉锐评2026年1至5月热点龙头股》**
+
+<img src="img/home.png" alt="1" width="600" align="center">
+
+## 我们的方法（KSTFT）
+
+<img src="img/method.png" alt="2" width="600" align="center">
 
 ## 技术栈
 
@@ -17,6 +44,7 @@ A Visualization System for Market Leaders and Theme Rotation
 | 数据处理  | Pandas           | 数据清洗、时间序列处理 |
 | 数值计算  | Numpy            | 指标计算        |
 | 数据分析  | Scikit-learn     | 机器学习数据分析 |
+| 深度学习  | Pytorch          | 深度学习框架 |
 | 静态可视化 | Matplotlib       | 数据科学统计图表 |
 | 高级可视化 | Pyecharts        | K线图/桑基图/热力图 |
 | Web展示 | Streamlit        | 可交互分析平台 |

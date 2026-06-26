@@ -12,7 +12,9 @@ import {
   Zap,
   Shield,
   BrainCircuit,
+  Activity,
 } from 'lucide-react'
+import AuthorInfo from '../components/AuthorInfo'
 
 const features = [
   {
@@ -38,6 +40,12 @@ const features = [
     title: '模型方案',
     desc: 'DragonFlow-KronosGraph：KS-TFT模型、K线分词、谱聚类嵌入与回测架构',
     path: '/model',
+  },
+  {
+    icon: Activity,
+    title: '数据流动画',
+    desc: '用动画展示算法输入、K线与图嵌入、KS-TFT融合、分位数输出和回测产物',
+    path: '/data-flow',
   },
   {
     icon: Search,
@@ -86,8 +94,13 @@ export default function HomePage() {
         >
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full badge-df mb-6">
             <Shield className="w-3.5 h-3.5 text-primary" />
-            <span>西南财经大学 · 数据可视化课程项目</span>
+            <span>西南财经大学 · 金融大数据分析与数据可视化课程项目</span>
           </div>
+          <img
+            src="/logo.png"
+            alt="DragonFlow logo"
+            className="mx-auto mb-5 h-20 w-20 rounded-2xl border border-primary/25 bg-white/[0.04] object-contain p-2 shadow-[0_0_28px_rgba(247,147,26,0.18)]"
+          />
           <h1
             className="text-6xl font-bold mb-4 tracking-tight"
             style={{
@@ -100,9 +113,10 @@ export default function HomePage() {
             DragonFlow
           </h1>
           <p className="text-lg text-fg-muted max-w-2xl mx-auto leading-relaxed">
-            A股龙头/热点股数据可视化分析系统。帮助用户快速复盘过往市场走势，
+            A股龙头/热点股金融大数据分析与数据可视化系统。帮助用户快速复盘过往市场走势，
             识别热点板块与龙头股。
           </p>
+          <AuthorInfo className="mx-auto mt-6 max-w-md text-left" />
         </motion.div>
 
         {/* Stats */}

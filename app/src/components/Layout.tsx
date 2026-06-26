@@ -9,8 +9,8 @@ import {
   Search,
   Menu,
   X,
-  Flame,
   BrainCircuit,
+  Activity,
 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -21,6 +21,7 @@ const navItems = [
   { path: '/process', label: '预处理', icon: Database },
   { path: '/analysis', label: '分析算法', icon: BarChart3 },
   { path: '/model', label: '模型方案', icon: BrainCircuit },
+  { path: '/data-flow', label: '数据流动画', icon: Activity },
   { path: '/explorer', label: '数据探索', icon: Search },
 ]
 
@@ -43,13 +44,8 @@ export default function Layout() {
       >
         {/* Logo */}
         <div className="flex items-center gap-3 px-4 h-16 border-b border-border/60">
-          <div
-            className="flex items-center justify-center w-9 h-9 rounded-xl animate-pulse-glow"
-            style={{
-              background: 'linear-gradient(135deg, #F7931A 0%, #EA580C 100%)',
-            }}
-          >
-            <Flame className="w-5 h-5 text-white" />
+          <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl border border-primary/25 bg-white/[0.04] animate-pulse-glow">
+            <img src="/logo.png" alt="DragonFlow logo" className="h-full w-full object-contain p-1" />
           </div>
           <AnimatePresence>
             {sidebarOpen && (
@@ -65,7 +61,7 @@ export default function Layout() {
                 >
                   DragonFlow
                 </h1>
-                <p className="text-[10px] text-fg-dim">A股龙头数据可视化</p>
+                <p className="text-[10px] text-fg-dim">A股金融大数据分析</p>
               </motion.div>
             )}
           </AnimatePresence>
@@ -133,6 +129,34 @@ export default function Layout() {
           })}
         </nav>
 
+        {/* GitHub Link */}
+        <a
+          href="https://github.com/LifeAlways/DragonFlow"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-center gap-2 px-3 py-2.5 mx-3 mb-2 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.05] hover:border-primary/30 transition-all duration-200 group"
+        >
+          <svg
+            className="w-5 h-5 text-fg-muted group-hover:text-primary transition-colors"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+          >
+            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+          </svg>
+          <AnimatePresence>
+            {sidebarOpen && (
+              <motion.span
+                initial={{ opacity: 0, width: 0 }}
+                animate={{ opacity: 1, width: 'auto' }}
+                exit={{ opacity: 0, width: 0 }}
+                className="text-xs font-medium text-fg-muted group-hover:text-fg whitespace-nowrap overflow-hidden"
+              >
+                GitHub
+              </motion.span>
+            )}
+          </AnimatePresence>
+        </a>
+
         {/* Footer */}
         <div className="p-4 border-t border-border/60">
           <AnimatePresence>
@@ -143,7 +167,7 @@ export default function Layout() {
                 exit={{ opacity: 0 }}
                 className="text-[10px] text-fg-dim text-center"
               >
-                西南财经大学 · 数据可视化课程
+                西南财经大学 · 金融大数据分析与数据可视化课程
               </motion.div>
             )}
           </AnimatePresence>

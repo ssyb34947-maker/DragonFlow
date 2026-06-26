@@ -1,4 +1,5 @@
-import { motion } from 'framer-motion'
+import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   Network,
   CandlestickChart,
@@ -13,9 +14,18 @@ import {
   FlaskConical,
   Activity,
   LineChart,
-  Gauge,
   TableProperties,
+  X,
+  ZoomIn,
 } from 'lucide-react'
+import AuthorInfo from '../components/AuthorInfo'
+
+type ZoomTarget = {
+  title: string
+  subtitle?: string
+  imageSrc?: string
+  imageAlt?: string
+}
 
 type Module = {
   id: string
@@ -34,6 +44,29 @@ const metrics = [
   ['输出', '收益分位数'],
 ]
 
+const splitRows = [
+  ['预热期', 'time_idx 0-39', '仅用于滚动特征、谱图窗口和编码器历史，不进入监督训练。'],
+  ['训练集', 'time_idx 40-64', '训练 KS-TFT 主模型，保持严格时间顺序。'],
+  ['验证集', 'time_idx 65-79', '用于早停、参数选择和过拟合监控。'],
+  ['测试集', 'time_idx 80-89', '只做最终泛化评估和组合回测。'],
+  ['预测段', 'time_idx 90-94', '无完整未来标签，仅保留为上线式预测演示。'],
+]
+
+const infrastructureCards = [
+  {
+    title: '数据面板',
+    rows: ['2000只股票 × 95个交易日', '基础面板 189,811 行', '日线、市场状态、技术形态、图嵌入、K线token表征'],
+  },
+  {
+    title: '输入输出',
+    rows: ['输入窗口：过去30个交易日', '目标变量：未来5日超额收益', '输出：q10 / q50 / q90 三个收益分位数'],
+  },
+  {
+    title: '实验协议',
+    rows: ['时间外推切分，不随机打乱', '谱图窗口40天，每5天重算', '成本后Top-K组合回测，含流动性与下行分位过滤'],
+  },
+]
+
 const modules: Module[] = [
   {
     id: 'panel-construction',
@@ -42,7 +75,7 @@ const modules: Module[] = [
     label: '数据协议',
     title: '时点一致的截面面板',
     thesis: '按交易日对齐个股行情、市场状态、形态特征和未来收益标签，形成可复现实验面板。',
-    contribution: '保留A股截面结构，避免把问题退化成单股票曲线拟合，也为后续图关系建模和组合回测提供统一入口。',
+    contribution: '保留A股截面结构，并采用预热/训练/验证/测试/预测段的时间外推切分，避免把问题退化成单股票曲线拟合。',
   },
   {
     id: 'kline-representation',
@@ -85,41 +118,46 @@ const evaluationSlots = [
   {
     id: 'result-data',
     icon: TableProperties,
-    title: '数据覆盖与时间切分',
-    desc: '训练/验证/测试区间、缺失率、标签覆盖率、截面样本分布。',
-    pending: '等待服务器导出 coverage_report 与 split_audit 图表。',
+    title: '组合净值与回撤',
+    desc: '展示策略净值、基准表现和回撤变化，用于检验预测信号能否转化为组合收益。',
+    imageSrc: '/assets/model/results/backtest_nav_drawdown.png',
+    imageAlt: 'KS-TFT组合净值与回撤图',
   },
   {
     id: 'result-kline',
     icon: Activity,
-    title: 'K线分词器诊断',
-    desc: '辅助任务 loss、token嵌入分布、典型形态聚类和稳定性检查。',
-    pending: '预留 kline_encoder_eval.png / embedding_umap.png。',
+    title: 'K线嵌入PCA',
+    desc: '展示K线分词器生成的形态嵌入在低维空间中的分布。',
+    imageSrc: '/assets/model/results/kline_embedding_pca.png',
+    imageAlt: 'K线嵌入PCA可视化',
   },
   {
     id: 'result-graph',
     icon: Network,
-    title: '谱聚类结构检验',
-    desc: '簇数量选择、同簇相关性、行业/风格一致性与消融对比。',
-    pending: '预留 spectral_embedding.png / peer_context_ablation.png。',
+    title: '谱聚类嵌入PCA',
+    desc: '展示谱聚类股票关系嵌入在低维空间中的结构分布。',
+    imageSrc: '/assets/model/results/spectral_embedding_pca.png',
+    imageAlt: '谱聚类嵌入PCA可视化',
   },
   {
     id: 'result-tft',
     icon: LineChart,
-    title: '预测与组合回测',
-    desc: 'IC、RankIC、分位数组合、净值曲线、回撤、换手和交易成本。',
-    pending: '预留 prediction_calibration.png / equity_curve.png / metrics_table.csv。',
+    title: '分位数预测校准',
+    desc: '展示KS-TFT输出分位数与真实收益分布之间的校准关系。',
+    imageSrc: '/assets/model/results/quantile_calibration.png',
+    imageAlt: 'KS-TFT分位数预测校准图',
   },
 ]
 
 const claims = [
   ['研究问题', '短周期A股截面预测同时受到价格形态非平稳、股票关系迁移和样本窗口有限的约束。'],
-  ['核心假设', 'K线分词器提供局部价格语义，谱聚类嵌入提供横截面关系先验，TFT负责融合并输出可交易预测。'],
+  ['核心假设', 'K线分词器提供局部价格语义，谱聚类嵌入提供基本面关系先验，TFT负责融合并输出可交易预测。'],
   ['方法设计', 'KS-TFT 的完整方法名为 K-line Tokenizer and Spectral-enhanced Temporal Fusion Transformer，将K线分词、谱聚类嵌入和TFT融合为一套截面收益预测协议。'],
   ['验证方式', '采用时间外推切分、模块消融和成本后组合回测评估，不用训练集拟合结果替代交易验证。'],
 ]
 
 const configs = [
+  ['hardware', 'Nvidia RTX 3050 4GB / RAM 8GB+'],
   ['spectral', 'graph_window / embedding_dim / k_min-k_max'],
   ['kline_encoder', 'd_model / heads / layers / auxiliary heads'],
   ['fusion_model', 'encoder_length / quantiles / dropout / device'],
@@ -131,6 +169,8 @@ function scrollTo(id: string) {
 }
 
 export default function ModelPage() {
+  const [zoomTarget, setZoomTarget] = useState<ZoomTarget | null>(null)
+
   return (
     <div className="mx-auto max-w-[1500px] space-y-6">
       <motion.section
@@ -166,16 +206,19 @@ export default function ModelPage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-2 overflow-hidden rounded-lg border border-border bg-black/20">
-              {metrics.map(([label, value], index) => (
-                <div
-                  key={label}
-                  className={`border-border px-4 py-4 ${index < 2 ? 'border-b' : ''} ${index % 2 === 0 ? 'border-r' : ''}`}
-                >
-                  <div className="text-[11px] font-medium uppercase tracking-wider text-fg-dim">{label}</div>
-                  <div className="mt-2 font-mono text-lg font-semibold text-primary">{value}</div>
-                </div>
-              ))}
+            <div className="grid gap-4">
+              <AuthorInfo />
+              <div className="grid grid-cols-2 overflow-hidden rounded-lg border border-border bg-black/20">
+                {metrics.map(([label, value], index) => (
+                  <div
+                    key={label}
+                    className={`border-border px-4 py-4 ${index < 2 ? 'border-b' : ''} ${index % 2 === 0 ? 'border-r' : ''}`}
+                  >
+                    <div className="text-[11px] font-medium uppercase tracking-wider text-fg-dim">{label}</div>
+                    <div className="mt-2 font-mono text-lg font-semibold text-primary">{value}</div>
+                  </div>
+                ))}
+              </div>
             </div>
           </header>
 
@@ -195,13 +238,29 @@ export default function ModelPage() {
                   <div className="text-xs font-semibold uppercase tracking-wider text-primary">架构总览</div>
                   <h2 className="text-2xl font-bold text-fg">从数据面板到组合回测的闭环</h2>
                 </div>
-                <div className="font-mono text-xs text-fg-dim">OHLCV / K线分词 / 谱嵌入 / TFT / 回测</div>
+                <div className="font-mono text-xs text-fg-dim">OHLCV / K线分词 / 谱聚类增强嵌入 / TFT / 回测</div>
               </div>
-              <img
-                src="/assets/model/kronosgraph-architecture.png"
-                alt="DragonFlow-KronosGraph 量化交易模型架构图"
-                className="h-[min(50vh,620px)] min-h-[390px] w-full rounded-lg object-contain"
-              />
+              <button
+                type="button"
+                onClick={() =>
+                  setZoomTarget({
+                    title: 'KS-TFT 架构总览',
+                    imageSrc: '/assets/model/kronosgraph-architecture.png',
+                    imageAlt: 'DragonFlow-KronosGraph 量化交易模型架构图',
+                  })
+                }
+                className="group relative block w-full cursor-zoom-in rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/70"
+              >
+                <img
+                  src="/assets/model/kronosgraph-architecture.png"
+                  alt="DragonFlow-KronosGraph 量化交易模型架构图"
+                  className="h-[min(50vh,620px)] min-h-[390px] w-full rounded-lg object-contain"
+                />
+                <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-md border border-white/10 bg-black/65 px-2.5 py-1.5 text-xs text-fg-muted opacity-0 backdrop-blur transition-opacity group-hover:opacity-100">
+                  <ZoomIn className="h-3.5 w-3.5 text-primary" />
+                  点击放大
+                </span>
+              </button>
             </figure>
           </section>
 
@@ -260,6 +319,39 @@ export default function ModelPage() {
               </div>
             </div>
           </section>
+
+          <section className="grid gap-4 border-t border-border pt-4 xl:grid-cols-[1fr_1.15fr]">
+            <div className="rounded-lg border border-border bg-black/20 p-4">
+              <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-fg">
+                <TableProperties className="h-4 w-4 text-primary" />
+                数据集划分
+              </div>
+              <div className="grid gap-2">
+                {splitRows.map(([name, range, note]) => (
+                  <div key={name} className="grid gap-1 rounded-md border border-border bg-white/[0.025] px-3 py-2 sm:grid-cols-[84px_120px_1fr] sm:items-center">
+                    <div className="text-sm font-semibold text-fg">{name}</div>
+                    <div className="font-mono text-[11px] text-primary">{range}</div>
+                    <div className="text-xs leading-relaxed text-fg-dim">{note}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid gap-3 lg:grid-cols-3">
+              {infrastructureCards.map((card) => (
+                <div key={card.title} className="rounded-lg border border-border bg-white/[0.03] p-4">
+                  <div className="mb-3 text-sm font-semibold text-fg">{card.title}</div>
+                  <div className="space-y-2">
+                    {card.rows.map((row) => (
+                      <div key={row} className="rounded-md bg-black/20 px-3 py-2 text-xs leading-relaxed text-fg-muted">
+                        {row}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
         </div>
       </motion.section>
 
@@ -285,7 +377,7 @@ export default function ModelPage() {
                 onClick={() => scrollTo(item.resultId)}
                 className="btn-secondary mt-5 inline-flex items-center gap-2 rounded-lg"
               >
-                跳转到测试结果占位
+                查看对应测试结果
                 <ArrowUpRight className="h-4 w-4" />
               </button>
             </section>
@@ -297,9 +389,9 @@ export default function ModelPage() {
         <div className="mb-5 flex flex-col gap-3 border-b border-border pb-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <div className="text-xs font-semibold uppercase tracking-wider text-primary">结果展示区</div>
-            <h2 className="mt-1 text-3xl font-bold text-fg">模型测试结果占位</h2>
+            <h2 className="mt-1 text-3xl font-bold text-fg">模型测试结果</h2>
             <p className="mt-2 max-w-4xl text-sm leading-relaxed text-fg-muted">
-              这里先按真实实验结构预留图表位置。服务器训练完成后，可替换为 IC/RankIC、消融实验、分位校准、净值曲线和交易成本后绩效图。
+              下方展示当前输出目录中的实验图表，覆盖组合回测、K线嵌入、谱聚类嵌入和分位数校准。
             </p>
           </div>
           <a
@@ -321,23 +413,84 @@ export default function ModelPage() {
               <article id={slot.id} key={slot.id} className="scroll-mt-6 rounded-lg border border-border bg-white/[0.03] p-5">
                 <div className="mb-4 flex items-start justify-between gap-4">
                   <div>
-                    <div className="text-[11px] font-semibold uppercase tracking-wider text-fg-dim">图表待补充</div>
-                    <h3 className="mt-1 text-xl font-bold text-fg">{slot.title}</h3>
+                    <h3 className="text-xl font-bold text-fg">{slot.title}</h3>
+                    <p className="mt-1 text-sm leading-relaxed text-fg-muted">{slot.desc}</p>
                   </div>
                   <Icon className="h-6 w-6 text-primary" />
                 </div>
-                <div className="flex min-h-[220px] items-center justify-center rounded-lg border border-dashed border-border bg-black/20 p-6 text-center">
-                  <div>
-                    <Gauge className="mx-auto h-8 w-8 text-fg-dim" />
-                    <p className="mt-3 text-sm font-semibold text-fg-muted">{slot.desc}</p>
-                    <p className="mt-2 font-mono text-xs leading-relaxed text-fg-dim">{slot.pending}</p>
-                  </div>
-                </div>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setZoomTarget({
+                      title: slot.title,
+                      subtitle: slot.desc,
+                      imageSrc: slot.imageSrc,
+                      imageAlt: slot.imageAlt,
+                    })
+                  }
+                  className="group relative block w-full cursor-zoom-in overflow-hidden rounded-lg border border-border bg-black/20 transition-colors hover:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/70"
+                >
+                  <img
+                    src={slot.imageSrc}
+                    alt={slot.imageAlt}
+                    className="h-[260px] w-full object-contain p-2"
+                  />
+                  <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-md border border-white/10 bg-black/65 px-2.5 py-1.5 text-xs text-fg-muted opacity-0 backdrop-blur transition-opacity group-hover:opacity-100">
+                    <ZoomIn className="h-3.5 w-3.5 text-primary" />
+                    点击放大
+                  </span>
+                </button>
               </article>
             )
           })}
         </div>
       </section>
+
+
+      <AnimatePresence>
+        {zoomTarget && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed bottom-0 right-0 top-0 left-[240px] z-50 flex items-center justify-center bg-black/86 p-3 backdrop-blur-sm"
+            onClick={() => setZoomTarget(null)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96, y: 12 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96, y: 12 }}
+              transition={{ duration: 0.18 }}
+              className="relative flex h-[88%] w-[88%] max-w-none flex-col overflow-hidden rounded-xl border border-border bg-surface shadow-2xl"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className="flex shrink-0 items-start justify-between gap-4 border-b border-border px-5 py-4">
+                <div>
+                  <div className="text-xs font-semibold uppercase tracking-wider text-primary">放大预览</div>
+                  <h3 className="mt-1 text-xl font-bold text-fg">{zoomTarget.title}</h3>
+                  {zoomTarget.subtitle && <p className="mt-1 text-sm text-fg-muted">{zoomTarget.subtitle}</p>}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setZoomTarget(null)}
+                  className="inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-border bg-white/[0.03] text-fg-muted transition-colors hover:border-primary/50 hover:text-fg focus:outline-none focus:ring-2 focus:ring-primary/70"
+                  aria-label="关闭放大预览"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+
+              <div className="min-h-0 flex-1 overflow-auto p-3">
+                <img
+                  src={zoomTarget.imageSrc}
+                  alt={zoomTarget.imageAlt ?? zoomTarget.title}
+                  className="mx-auto h-full w-full object-contain"
+                />
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <section className="grid gap-4 lg:grid-cols-3">
         <div className="card-df p-5">
